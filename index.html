@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a28">
+<title>印旛村市民マラソン</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="fit">
+  <div class="phone" id="phone">
+    <canvas id="view" width="540" height="960"></canvas>
+    <header class="hud" id="hud" hidden>
+      <div>
+        <p class="yen" id="yen">¥0</p>
+        <p class="meta"><span id="who"></span><span id="dist">0 m</span><span id="clock">0:00</span></p>
+      </div>
+      <div class="hud-actions">
+        <button type="button" id="mute">音オン</button>
+        <button type="button" id="pause">一時停止</button>
+      </div>
+    </header>
+    <p class="coach" id="coach" hidden>上でジャンプ。下でスライディング。</p>
+    <div class="bar" id="bar" hidden>
+      <button type="button" id="btn-jump">ジャンプ</button>
+      <button type="button" id="btn-slide">スライディング</button>
+    </div>
+    <div class="overlay" id="overlay">
+      <section class="card" id="screen-title">
+        <p class="eyebrow">まっすぐ、右へ</p>
+        <h1>印旛村<br>市民マラソン</h1>
+        <p class="lead">上でジャンプ。下でスライディング。<br>拾った100円がスコア。</p>
+        <button type="button" class="go" id="to-select">走る人を選ぶ</button>
+        <p class="best" id="title-best"></p>
+      </section>
+      <section class="card" id="screen-select" hidden>
+        <h2>誰が走る？</h2>
+        <div class="picks" id="picks"></div>
+        <button type="button" class="texty" id="back">戻る</button>
+      </section>
+      <section class="card" id="screen-pause" hidden>
+        <h2>一時停止</h2>
+        <p class="lead">道は止まっています。</p>
+        <button type="button" class="go" id="resume">再開</button>
+        <button type="button" class="texty" id="quit">やめる</button>
+      </section>
+      <section class="card" id="screen-over" hidden>
+        <p class="eyebrow" id="over-flag">リタイア</p>
+        <p class="yen big" id="over-yen">¥0</p>
+        <p class="lead" id="over-meta"></p>
+        <button type="button" class="go" id="retry">もう一走</button>
+        <button type="button" class="texty" id="reselect">選び直す</button>
+      </section>
+    </div>
+  </div>
+</div>
+<script src="js/logic.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
