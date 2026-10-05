@@ -29,6 +29,13 @@
     };
   }
 
+  // ケニーの jump 1.12 は、足の最高点が垂れ幕の上端（376）を超えない値。
+  function stats(id) {
+    if (id === "massa") return { speed: 0.7, jump: 1 };
+    if (id === "kenny") return { speed: 1.3, jump: 1.12 };
+    return { speed: 1, jump: 1 };
+  }
+
   function createRun(id, seed) {
     var run = {
       id: id,
@@ -37,7 +44,7 @@
       t: 0,
       deadT: 0,
       dist: 0,
-      speed: PX_PER_M * BASE_MPS,
+      speed: PX_PER_M * BASE_MPS * stats(id).speed,
       vy: 0,
       y: 0,
       state: "run",
@@ -79,14 +86,14 @@
     return true;
   }
 
-  function targetSpeed(dist) {
-    var meters = dist / PX_PER_M;
-    return PX_PER_M * (BASE_MPS + Math.min(MAX_EXTRA_MPS, meters / 110));
+  function targetSpeed(run) {
+    var meters = run.dist / PX_PER_M;
+    return PX_PER_M * (BASE_MPS + Math.min(MAX_EXTRA_MPS, meters / 110)) * stats(run.id).speed;
   }
 
   function startJump(run) {
     run.state = "jump";
-    run.vy = JUMP_V;
+    run.vy = JUMP_V * stats(run.id).jump;
     run.y = 0;
     run.jumpBuf = 0;
     run.slideT = 0;
@@ -104,6 +111,10 @@
 
   function pushCoin(run, x, lift) {
     run.ents.push({ type: "coin", x: x, lift: lift, dead: false, hint: null });
+  }
+
+  function pushNakkiCoin(run, x, lift) {
+    if (run.id === "nakki") pushCoin(run, x, lift);
   }
 
   function pushSolid(run, x, type) {
@@ -132,11 +143,17 @@
       if (kind === "coins") {
         var i;
         for (i = 0; i < 5; i += 1) pushCoin(run, run.nextX + i * 74, 46);
+        pushNakkiCoin(run, run.nextX + 37, 108);
+        pushNakkiCoin(run, run.nextX + 111, 108);
+        pushNakkiCoin(run, run.nextX + 185, 108);
         run.nextX += 430;
       } else if (kind === "arc") {
         var lifts = [42, 108, 156, 108, 42];
         var n;
         for (n = 0; n < lifts.length; n += 1) pushCoin(run, run.nextX + n * 80, lifts[n]);
+        pushNakkiCoin(run, run.nextX + 40, 72);
+        pushNakkiCoin(run, run.nextX + 160, 112);
+        pushNakkiCoin(run, run.nextX + 280, 72);
         run.nextX += 460;
       } else {
         var gap = Math.max(620, run.speed * 1.45);
@@ -145,18 +162,24 @@
           pushSolid(run, x, "banner");
           pushCoin(run, x + 8, 28);
           pushCoin(run, x + 78, 28);
+          pushNakkiCoin(run, x + 8, 78);
+          pushNakkiCoin(run, x + 78, 78);
           run.nextX = run.lastSolidX + 120;
         } else if (kind === "pair") {
           pushSolid(run, x, "hurdle");
           pushCoin(run, x + 70, 150);
+          pushNakkiCoin(run, x + 108, 150);
           var x2 = run.lastSolidX + gap;
           pushSolid(run, x2, "banner");
           pushCoin(run, x2 + 6, 28);
+          pushNakkiCoin(run, x2 + 44, 28);
           run.nextX = run.lastSolidX + 120;
         } else {
           pushSolid(run, x, "hurdle");
           pushCoin(run, x + 64, 148);
           pushCoin(run, x + 132, 120);
+          pushNakkiCoin(run, x + 96, 168);
+          pushNakkiCoin(run, x + 164, 132);
           run.nextX = run.lastSolidX + 120;
         }
       }
@@ -166,10 +189,16 @@
   function rollKind(run) {
     var meters = run.nextX / PX_PER_M;
     var r = run.rng();
-    if (meters > 150 && r < 0.18) return "pair";
-    if (meters > 55 && r < 0.48) return "banner";
-    if (meters > 30 && r < 0.78) return "hurdle";
-    return r < 0.45 ? "arc" : "coins";
+    var kind;
+    if (meters > 150 && r < 0.18) kind = "pair";
+    else if (meters > 55 && r < 0.48) kind = "banner";
+    else if (meters > 30 && r < 0.78) kind = "hurdle";
+    else kind = r < 0.45 ? "arc" : "coins";
+    // 序盤の見本ハードルは残し、その後のハードルと連続障害の約6割をコインか垂れ幕に替える。
+    if (run.id === "massa" && (kind === "hurdle" || kind === "pair") && run.rng() < 0.62) {
+      kind = run.rng() < 0.7 ? "coins" : "banner";
+    }
+    return kind;
   }
 
   function update(run, dt, input) {
@@ -185,7 +214,7 @@
       if (run.countdown <= 0) {
         run.phase = "run";
         run.countdown = 0;
-        run.speed = PX_PER_M * BASE_MPS;
+        run.speed = PX_PER_M * BASE_MPS * stats(run.id).speed;
       }
       return events;
     }
@@ -203,7 +232,7 @@
       return events;
     }
 
-    var want = targetSpeed(run.dist);
+    var want = targetSpeed(run);
     run.speed += (want - run.speed) * Math.min(1, dt * 1.4);
     run.dist += run.speed * dt;
     run.t += dt;
@@ -281,5 +310,6 @@
     JUMP_V: JUMP_V,
     GRAVITY: GRAVITY,
     SLIDE_TIME: SLIDE_TIME,
+    stats: stats,
   };
 })(typeof globalThis !== "undefined" ? globalThis : this);

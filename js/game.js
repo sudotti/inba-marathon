@@ -10,19 +10,19 @@
     {
       id: "massa",
       name: "マッサ",
-      line: "巻き髪、クリームの服、銀のチェーン",
+      line: "あしおそい",
       portrait: "assets/portraits/massa.jpg",
     },
     {
       id: "nakki",
       name: "ナッキー",
-      line: "金のチェーン、ジーンズ、茶色の靴",
+      line: "おかねかせげる",
       portrait: "assets/portraits/nakki.jpg",
     },
     {
       id: "kenny",
       name: "ケニー",
-      line: "黒いくせ毛、白T、青い靴",
+      line: "あしはやい、たかくとぶ",
       portrait: "assets/portraits/kenny.png",
     },
   ];
